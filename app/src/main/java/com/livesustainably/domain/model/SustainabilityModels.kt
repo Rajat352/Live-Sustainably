@@ -1,5 +1,7 @@
 package com.livesustainably.domain.model
 
+val PRESET_AVATARS: Set<String> = setOf("leaf", "tree", "sun", "earth")
+
 enum class ActivityCategory {
     Transport,
     Food,

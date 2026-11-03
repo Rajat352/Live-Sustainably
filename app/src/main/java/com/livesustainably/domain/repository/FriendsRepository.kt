@@ -5,6 +5,7 @@ import com.livesustainably.domain.model.DemoMapConfiguration
 import kotlinx.coroutines.flow.Flow
 
 interface FriendsRepository {
+    suspend fun provisionDemoFriends(userId: String)
     fun observeFriendIds(userId: String): Flow<Set<String>>
     fun observeDemoFriends(userId: String): Flow<List<DemoFriend>>
     fun observeMapConfiguration(): Flow<DemoMapConfiguration>

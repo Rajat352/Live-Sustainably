@@ -9,6 +9,7 @@ import com.google.firebase.database.Transaction
 import com.livesustainably.domain.model.AuthException
 import com.livesustainably.domain.model.AuthFailure
 import com.livesustainably.domain.model.UserProfile
+import com.livesustainably.domain.repository.FriendsRepository
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -16,7 +17,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 
 class FirebaseInitialUserDataSource @Inject constructor(
-    private val database: FirebaseDatabase
+    private val database: FirebaseDatabase,
+    private val friends: FriendsRepository,
 ) : InitialUserDataSource {
 
     override suspend fun ensureUser(account: AuthAccount): UserProfile {
@@ -29,6 +31,7 @@ class FirebaseInitialUserDataSource @Inject constructor(
         database.getReference("privateUsers").child(account.userId)
             .createIfMissing(InitialUserRecords.privateUser(account))
         val profile = profileRef.createIfMissing(InitialUserRecords.publicProfile(displayName))
+        friends.provisionDemoFriends(account.userId)
         return UserProfile(
             userId = account.userId,
             displayName = requireNotNull(profile.child("displayName").getValue(String::class.java)),
