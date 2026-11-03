@@ -15,12 +15,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreOwner
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
@@ -29,8 +32,11 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.livesustainably.domain.model.UserSession
 import com.livesustainably.ui.SessionUiState
+import com.livesustainably.ui.screens.profile.ProfileViewModel
+import com.livesustainably.ui.screens.auth.AuthScreen
 import com.livesustainably.ui.components.LoadingContent
 import com.livesustainably.ui.components.ScreenPlaceholder
+import com.livesustainably.ui.screens.profile.ProfileScreen
 
 @Composable
 fun RootNav(
@@ -72,26 +78,32 @@ private fun AuthNavDisplay() {
             rememberViewModelStoreNavEntryDecorator(),
         ),
         entryProvider = entryProvider {
-            entry<AppRoute.Login> { ScreenPlaceholder("Login") }
-            entry<AppRoute.Signup> { ScreenPlaceholder("Signup") }
+            entry<AppRoute.Login> { AuthScreen(isSignup = false, onSwitchForm = { stack.add(AppRoute.Signup) }) }
+            entry<AppRoute.Signup> { AuthScreen(isSignup = true, onSwitchForm = { stack.removeAt(stack.lastIndex) }) }
         },
     )
 }
 
 @Composable
 private fun AppNavDisplay() {
+
+    val viewModel: ProfileViewModel = hiltViewModel()
+    val accountState by viewModel.state.collectAsStateWithLifecycle()
+
     val navigation = rememberAppNavigationState()
     val currentKey = navigation.currentStack.lastOrNull()
+
     val provider = entryProvider<NavKey> {
         entry<AppRoute.TopLevel.Feed> { ScreenPlaceholder("Feed") }
         entry<AppRoute.TopLevel.Reports> { ScreenPlaceholder("Reports") }
         entry<AppRoute.TopLevel.FriendsMap> { ScreenPlaceholder("Map") }
         entry<AppRoute.Chat> { ScreenPlaceholder("Chat") }
         entry<AppRoute.Leaderboard> { ScreenPlaceholder("Leaderboard") }
-        entry<AppRoute.TopLevel.Profile> { ScreenPlaceholder("Profile") }
+        entry<AppRoute.TopLevel.Profile> { ProfileScreen(accountState, viewModel::signOut, viewModel::retryProfile) }
         entry<AppRoute.Comments> { ScreenPlaceholder("Comments") }
     }
-    // Keep every tab's decorators in composition so hidden tabs retain entry state and ViewModels.
+
+    // Keep every tab's decorators in composition so hidden tabs retain entry state and ViewModels
     val entries = TopLevelDestinations.entries.associateWith { tab ->
         key(tab) {
             rememberDecoratedNavEntries(

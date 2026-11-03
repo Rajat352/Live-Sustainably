@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.livesustainably.domain.model.UserSession
-import com.livesustainably.domain.repository.SessionRepository
+import com.livesustainably.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,7 +24,7 @@ data class SessionUiState(
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    repository: SessionRepository,
+    repository: AuthRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     // Keep observing while backgrounded so account transitions invalidate old navigation state
