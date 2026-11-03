@@ -1,0 +1,137 @@
+package com.livesustainably.ui.navigation
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreOwner
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberDecoratedNavEntries
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import com.livesustainably.domain.model.UserSession
+import com.livesustainably.ui.SessionUiState
+import com.livesustainably.ui.components.LoadingContent
+import com.livesustainably.ui.components.ScreenPlaceholder
+
+@Composable
+fun RootNav(
+    state: SessionUiState,
+    modifier: Modifier = Modifier
+) {
+    Surface(modifier.fillMaxSize()) {
+        when (state.session) {
+            UserSession.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                LoadingContent("Restoring your session…")
+            }
+            else -> {
+                key(state.navigationKey) {
+                    val sessionOwner = rememberViewModelStoreOwner()
+                    CompositionLocalProvider(LocalViewModelStoreOwner provides sessionOwner) {
+                        Box(Modifier.fillMaxSize().safeDrawingPadding()) {
+                            if (state.session is UserSession.SignedIn) {
+                                AppNavDisplay()
+                            } else {
+                                AuthNavDisplay()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AuthNavDisplay() {
+    val stack = rememberNavBackStack(AppRoute.Login)
+
+    NavDisplay(
+        backStack = stack,
+        onBack = { if (stack.size > 1) stack.removeAt(stack.lastIndex) },
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator(),
+        ),
+        entryProvider = entryProvider {
+            entry<AppRoute.Login> { ScreenPlaceholder("Login") }
+            entry<AppRoute.Signup> { ScreenPlaceholder("Signup") }
+        },
+    )
+}
+
+@Composable
+private fun AppNavDisplay() {
+    val navigation = rememberAppNavigationState()
+    val currentKey = navigation.currentStack.lastOrNull()
+    val provider = entryProvider<NavKey> {
+        entry<AppRoute.TopLevel.Feed> { ScreenPlaceholder("Feed") }
+        entry<AppRoute.TopLevel.Reports> { ScreenPlaceholder("Reports") }
+        entry<AppRoute.TopLevel.FriendsMap> { ScreenPlaceholder("Map") }
+        entry<AppRoute.Chat> { ScreenPlaceholder("Chat") }
+        entry<AppRoute.Leaderboard> { ScreenPlaceholder("Leaderboard") }
+        entry<AppRoute.TopLevel.Profile> { ScreenPlaceholder("Profile") }
+        entry<AppRoute.Comments> { ScreenPlaceholder("Comments") }
+    }
+    // Keep every tab's decorators in composition so hidden tabs retain entry state and ViewModels.
+    val entries = TopLevelDestinations.entries.associateWith { tab ->
+        key(tab) {
+            rememberDecoratedNavEntries(
+                backStack = navigation.backStacks.getValue(tab),
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator(),
+                ),
+                entryProvider = provider,
+            )
+        }
+    }
+    BackHandler(enabled = navigation.currentStack.size == 1 && navigation.selectedTab != TopLevelDestinations.Feed) {
+        navigation.goBack()
+    }
+    Scaffold(
+        topBar = {
+            if (navigation.canGoBack) {
+                TextButton(onClick = navigation::goBack) { Text("Back") }
+            }
+        },
+        bottomBar = {
+            if (currentKey is AppRoute.TopLevel) {
+                NavigationBar {
+                    TopLevelDestinations.entries.forEach { tab ->
+                        NavigationBarItem(
+                            selected = currentKey == tab.route,
+                            onClick = { navigation.selectTab(tab) },
+                            icon = { Icon(painterResource(tab.icon), contentDescription = null) },
+                            label = { Text(tab.label) },
+                        )
+                    }
+                }
+            }
+        },
+    ) { padding ->
+        NavDisplay(
+            entries = entries.getValue(navigation.selectedTab),
+            onBack = navigation::goBack,
+            modifier = Modifier.padding(padding),
+        )
+    }
+}
