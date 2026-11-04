@@ -9,10 +9,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import java.time.Clock
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+    @Provides
+    fun provideClock(): Clock = Clock.systemDefaultZone()
+
     @Provides
     @Singleton
     fun provideFirebaseApp(): FirebaseApp = FirebaseApp.getInstance()

@@ -22,7 +22,7 @@ class AppNavigationState(
 
     fun navigate(route: AppRoute) {
         TopLevelDestinations.entries.firstOrNull { it.route == route }?.let { selectTab(it); return }
-        require(route is AppRoute.Comments || route == AppRoute.Chat || route == AppRoute.Leaderboard)
+        require(route is AppRoute.Comments || route == AppRoute.Chat || route is AppRoute.Leaderboard)
         // Keys identify entries, bring an existing destination forward without duplicate ViewModels
         val existingIndex = currentStack.indexOf(route)
         if (existingIndex >= 0) {

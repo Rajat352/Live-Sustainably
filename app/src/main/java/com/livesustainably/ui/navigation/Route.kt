@@ -3,6 +3,7 @@ package com.livesustainably.ui.navigation
 import androidx.annotation.DrawableRes
 import androidx.navigation3.runtime.NavKey
 import com.livesustainably.R
+import com.livesustainably.domain.model.ReportPeriod
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -18,7 +19,7 @@ sealed interface AppRoute : NavKey {
     }
 
     @Serializable data object Chat : AppRoute
-    @Serializable data object Leaderboard : AppRoute
+    @Serializable data class Leaderboard(val period: ReportPeriod, val anchorEpochDay: Long) : AppRoute
     @Serializable data class Comments(val authorId: String, val postId: String) : AppRoute
 }
 

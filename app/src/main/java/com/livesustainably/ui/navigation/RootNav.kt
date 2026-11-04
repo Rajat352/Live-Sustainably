@@ -42,6 +42,12 @@ import com.livesustainably.ui.screens.feed.FeedViewModel
 import com.livesustainably.ui.screens.comments.CommentsScreen
 import com.livesustainably.ui.screens.comments.CommentsViewModel
 import com.livesustainably.ui.screens.comments.CommentThread
+import com.livesustainably.domain.model.ReportSelection
+import com.livesustainably.ui.screens.reports.ReportsScreen
+import com.livesustainably.ui.screens.reports.ReportsViewModel
+import com.livesustainably.ui.screens.leaderboard.LeaderboardScreen
+import com.livesustainably.ui.screens.leaderboard.LeaderboardViewModel
+import java.time.LocalDate
 
 @Composable
 fun RootNav(
@@ -106,10 +112,22 @@ private fun AppNavDisplay() {
                 navigation.navigate(AppRoute.Comments(post.authorId, post.postId))
             }
         }
-        entry<AppRoute.TopLevel.Reports> { ScreenPlaceholder("Reports") }
+        entry<AppRoute.TopLevel.Reports> {
+            val reportsViewModel: ReportsViewModel = hiltViewModel()
+            val reportsState by reportsViewModel.state.collectAsStateWithLifecycle()
+            ReportsScreen(reportsState, reportsViewModel::onAction) { selection ->
+                navigation.navigate(AppRoute.Leaderboard(selection.period, selection.anchorDate.toEpochDay()))
+            }
+        }
         entry<AppRoute.TopLevel.FriendsMap> { ScreenPlaceholder("Map") }
         entry<AppRoute.Chat> { ScreenPlaceholder("Chat") }
-        entry<AppRoute.Leaderboard> { ScreenPlaceholder("Leaderboard") }
+        entry<AppRoute.Leaderboard> { route ->
+            val leaderboardViewModel = hiltViewModel<LeaderboardViewModel, LeaderboardViewModel.Factory>(
+                creationCallback = { it.create(ReportSelection(route.period, LocalDate.ofEpochDay(route.anchorEpochDay))) },
+            )
+            val leaderboardState by leaderboardViewModel.state.collectAsStateWithLifecycle()
+            LeaderboardScreen(leaderboardState, leaderboardViewModel::retry)
+        }
         entry<AppRoute.TopLevel.Profile> { ProfileScreen(accountState, viewModel::signOut, viewModel::retryProfile) }
         entry<AppRoute.Comments> { route ->
             val commentsViewModel = hiltViewModel<CommentsViewModel, CommentsViewModel.Factory>(
