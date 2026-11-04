@@ -37,6 +37,11 @@ import com.livesustainably.ui.screens.auth.AuthScreen
 import com.livesustainably.ui.components.LoadingContent
 import com.livesustainably.ui.components.ScreenPlaceholder
 import com.livesustainably.ui.screens.profile.ProfileScreen
+import com.livesustainably.ui.screens.feed.FeedScreen
+import com.livesustainably.ui.screens.feed.FeedViewModel
+import com.livesustainably.ui.screens.comments.CommentsScreen
+import com.livesustainably.ui.screens.comments.CommentsViewModel
+import com.livesustainably.ui.screens.comments.CommentThread
 
 @Composable
 fun RootNav(
@@ -94,13 +99,25 @@ private fun AppNavDisplay() {
     val currentKey = navigation.currentStack.lastOrNull()
 
     val provider = entryProvider<NavKey> {
-        entry<AppRoute.TopLevel.Feed> { ScreenPlaceholder("Feed") }
+        entry<AppRoute.TopLevel.Feed> {
+            val feedViewModel: FeedViewModel = hiltViewModel()
+            val feedState by feedViewModel.state.collectAsStateWithLifecycle()
+            FeedScreen(feedState, feedViewModel::onAction) { post ->
+                navigation.navigate(AppRoute.Comments(post.authorId, post.postId))
+            }
+        }
         entry<AppRoute.TopLevel.Reports> { ScreenPlaceholder("Reports") }
         entry<AppRoute.TopLevel.FriendsMap> { ScreenPlaceholder("Map") }
         entry<AppRoute.Chat> { ScreenPlaceholder("Chat") }
         entry<AppRoute.Leaderboard> { ScreenPlaceholder("Leaderboard") }
         entry<AppRoute.TopLevel.Profile> { ProfileScreen(accountState, viewModel::signOut, viewModel::retryProfile) }
-        entry<AppRoute.Comments> { ScreenPlaceholder("Comments") }
+        entry<AppRoute.Comments> { route ->
+            val commentsViewModel = hiltViewModel<CommentsViewModel, CommentsViewModel.Factory>(
+                creationCallback = { it.create(CommentThread(route.authorId, route.postId)) },
+            )
+            val commentsState by commentsViewModel.state.collectAsStateWithLifecycle()
+            CommentsScreen(commentsState, commentsViewModel::updateDraft, commentsViewModel::send, commentsViewModel::retry)
+        }
     }
 
     // Keep every tab's decorators in composition so hidden tabs retain entry state and ViewModels
