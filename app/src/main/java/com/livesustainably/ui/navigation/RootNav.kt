@@ -47,6 +47,8 @@ import com.livesustainably.ui.screens.reports.ReportsScreen
 import com.livesustainably.ui.screens.reports.ReportsViewModel
 import com.livesustainably.ui.screens.leaderboard.LeaderboardScreen
 import com.livesustainably.ui.screens.leaderboard.LeaderboardViewModel
+import com.livesustainably.ui.screens.friendsmap.FriendsMapScreen
+import com.livesustainably.ui.screens.friendsmap.FriendsMapViewModel
 import java.time.LocalDate
 
 @Composable
@@ -119,7 +121,11 @@ private fun AppNavDisplay() {
                 navigation.navigate(AppRoute.Leaderboard(selection.period, selection.anchorDate.toEpochDay()))
             }
         }
-        entry<AppRoute.TopLevel.FriendsMap> { ScreenPlaceholder("Map") }
+        entry<AppRoute.TopLevel.FriendsMap> {
+            val mapViewModel: FriendsMapViewModel = hiltViewModel()
+            val mapState by mapViewModel.state.collectAsStateWithLifecycle()
+            FriendsMapScreen(mapState, mapViewModel::selectFriend, mapViewModel::retry)
+        }
         entry<AppRoute.Chat> { ScreenPlaceholder("Chat") }
         entry<AppRoute.Leaderboard> { route ->
             val leaderboardViewModel = hiltViewModel<LeaderboardViewModel, LeaderboardViewModel.Factory>(
