@@ -35,7 +35,8 @@ import com.livesustainably.ui.SessionUiState
 import com.livesustainably.ui.screens.profile.ProfileViewModel
 import com.livesustainably.ui.screens.auth.AuthScreen
 import com.livesustainably.ui.components.LoadingContent
-import com.livesustainably.ui.components.ScreenPlaceholder
+import com.livesustainably.ui.screens.chat.ChatScreen
+import com.livesustainably.ui.screens.chat.ChatViewModel
 import com.livesustainably.ui.screens.profile.ProfileScreen
 import com.livesustainably.ui.screens.feed.FeedScreen
 import com.livesustainably.ui.screens.feed.FeedViewModel
@@ -110,7 +111,7 @@ private fun AppNavDisplay() {
         entry<AppRoute.TopLevel.Feed> {
             val feedViewModel: FeedViewModel = hiltViewModel()
             val feedState by feedViewModel.state.collectAsStateWithLifecycle()
-            FeedScreen(feedState, feedViewModel::onAction) { post ->
+            FeedScreen(feedState, feedViewModel::onAction, onChat = { navigation.navigate(AppRoute.Chat) }) { post ->
                 navigation.navigate(AppRoute.Comments(post.authorId, post.postId))
             }
         }
@@ -126,7 +127,11 @@ private fun AppNavDisplay() {
             val mapState by mapViewModel.state.collectAsStateWithLifecycle()
             FriendsMapScreen(mapState, mapViewModel::selectFriend, mapViewModel::retry)
         }
-        entry<AppRoute.Chat> { ScreenPlaceholder("Chat") }
+        entry<AppRoute.Chat> {
+            val chatViewModel: ChatViewModel = hiltViewModel()
+            val chatState by chatViewModel.state.collectAsStateWithLifecycle()
+            ChatScreen(chatState, chatViewModel::onAction)
+        }
         entry<AppRoute.Leaderboard> { route ->
             val leaderboardViewModel = hiltViewModel<LeaderboardViewModel, LeaderboardViewModel.Factory>(
                 creationCallback = { it.create(ReportSelection(route.period, LocalDate.ofEpochDay(route.anchorEpochDay))) },
@@ -146,7 +151,7 @@ private fun AppNavDisplay() {
 
     // Keep every tab's decorators in composition so hidden tabs retain entry state and ViewModels
     val entries = TopLevelDestinations.entries.associateWith { tab ->
-        key(tab) {
+        key(tab.name) {
             rememberDecoratedNavEntries(
                 backStack = navigation.backStacks.getValue(tab),
                 entryDecorators = listOf(

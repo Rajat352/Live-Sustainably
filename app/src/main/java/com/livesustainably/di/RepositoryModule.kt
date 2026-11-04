@@ -9,6 +9,8 @@ import com.livesustainably.data.repository.FirebaseActivityRepository
 import com.livesustainably.data.repository.FirebaseFeedRepository
 import com.livesustainably.data.repository.FirebaseFriendsRepository
 import com.livesustainably.data.repository.FirebaseProfileRepository
+import com.livesustainably.data.repository.LocalChatRepository
+import com.livesustainably.domain.repository.ChatRepository
 import com.livesustainably.domain.repository.ActivityRepository
 import com.livesustainably.domain.repository.FeedRepository
 import com.livesustainably.domain.repository.FriendsRepository
@@ -23,6 +25,9 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+
+    @Binds
+    abstract fun bindChatRepository(repository: LocalChatRepository): ChatRepository
 
     @Binds
     abstract fun bindActivityRepository(repository: FirebaseActivityRepository): ActivityRepository

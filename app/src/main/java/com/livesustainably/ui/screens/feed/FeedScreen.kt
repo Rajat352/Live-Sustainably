@@ -35,6 +35,7 @@ import com.livesustainably.ui.components.LoadingContent
 fun FeedScreen(
     state: FeedUiState,
     onAction: (FeedAction) -> Unit,
+    onChat: () -> Unit,
     onComments: (PostKey) -> Unit
 ) {
 
@@ -48,6 +49,7 @@ fun FeedScreen(
                 Text(stringResource(R.string.feed_title), style = MaterialTheme.typography.headlineLarge)
                 Text(stringResource(R.string.feed_subtitle), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(stringResource(R.string.feed_description), style = MaterialTheme.typography.bodyMedium)
+                TextButton(onClick = onChat) { Text(stringResource(R.string.chat_open)) }
             }
         }
         when {

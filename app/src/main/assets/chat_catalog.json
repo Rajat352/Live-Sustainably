@@ -1,0 +1,168 @@
+{
+  "fallback": "I have predefined answers about transport, food, shopping, waste, CO₂e estimates, and using this app. Try a suggested question or ask about one of those topics.",
+  "intents": [
+    {
+      "id": "personal_month",
+      "kind": "Month",
+      "phrases": [
+        "my month",
+        "my monthly",
+        "my impact this month",
+        "my savings this month",
+        "my points this month",
+        "my report this month",
+        "my progress this month",
+        "how much have i saved this month",
+        "my savings for this month",
+        "my points for this month",
+        "my report for this month",
+        "my progress for this month",
+        "how much co2 have i saved this month",
+        "how much co2e have i saved this month"
+      ],
+      "reply": ""
+    },
+    {
+      "id": "personal_week",
+      "kind": "Week",
+      "phrases": [
+        "my week",
+        "my weekly",
+        "my impact",
+        "my savings",
+        "my points",
+        "my report",
+        "my progress",
+        "how much have i saved",
+        "how much co2 have i saved",
+        "how much co2e have i saved"
+      ],
+      "reply": ""
+    },
+    {
+      "id": "estimates",
+      "kind": "Text",
+      "phrases": [
+        "co2",
+        "co2e",
+        "carbon",
+        "emissions",
+        "estimate",
+        "estimates",
+        "footprint",
+        "points"
+      ],
+      "reply": "Reports add the estimated kg CO₂e and points stored with each activity. These are illustrative savings, not a measurement of your full carbon footprint. Points are a separate score with no fixed conversion to kilograms. Open Reports to choose a week, month, or category; demo history is labelled."
+    },
+    {
+      "id": "transport",
+      "kind": "Text",
+      "phrases": [
+        "transport",
+        "travel",
+        "bus",
+        "train",
+        "walk",
+        "walking",
+        "cycle",
+        "cycling",
+        "bike",
+        "car",
+        "commute"
+      ],
+      "reply": "For a suitable short trip, consider walking or cycling. For longer trips, compare public transport or sharing a ride. Choose an option that works for your route and mobility needs. Actual emissions depend on distance, vehicle, energy source, and occupancy; this chat does not calculate trip savings."
+    },
+    {
+      "id": "food",
+      "kind": "Text",
+      "phrases": [
+        "food",
+        "meal",
+        "meals",
+        "diet",
+        "vegetarian",
+        "vegan",
+        "plant based",
+        "meat",
+        "eat",
+        "eating"
+      ],
+      "reply": "Try a plant-based meal you enjoy, plan portions, and use leftovers safely to reduce food waste. Start with a small change that suits your needs. The app's Food reports summarize stored activity estimates; this chat does not assign savings to a meal."
+    },
+    {
+      "id": "shopping",
+      "kind": "Text",
+      "phrases": [
+        "shopping",
+        "shop",
+        "buy",
+        "buying",
+        "clothes",
+        "clothing",
+        "repair",
+        "reuse",
+        "second hand"
+      ],
+      "reply": "Before buying, check whether you can use, repair, borrow, or buy a second-hand item. If you need something new, consider durability and how often you will use it. Shopping reports show stored estimates, rather than a verified lifecycle assessment of your purchases."
+    },
+    {
+      "id": "waste",
+      "kind": "Text",
+      "phrases": [
+        "waste",
+        "recycle",
+        "recycling",
+        "rubbish",
+        "trash",
+        "plastic",
+        "compost"
+      ],
+      "reply": "Reduce unnecessary packaging and reuse suitable containers first. Check your local collection guidance before sorting recyclables; accepted materials vary. Compost food scraps where a suitable service or home setup exists. Waste is an advice topic here; the report categories are Transport, Food, and Shopping."
+    },
+    {
+      "id": "map",
+      "kind": "Text",
+      "phrases": [
+        "map",
+        "location",
+        "nearby",
+        "tracking"
+      ],
+      "reply": "The Map tab shows fictional demo friend positions and sample statuses around a configured sample center. These are not live locations. The app does not collect your device location. Map tiles and new friend data need a connection."
+    },
+    {
+      "id": "community",
+      "kind": "Text",
+      "phrases": [
+        "feed",
+        "friend",
+        "friends",
+        "like",
+        "comment",
+        "leaderboard",
+        "ranking",
+        "likes",
+        "comments"
+      ],
+      "reply": "The Feed shows activities shared by you and your authorized friends, with likes and comments. Demo activities are labelled. Open Reports, then View period leaderboard, to compare all-category period points. Demo friend scores are illustrative snapshots. New accounts start without personal activity history."
+    },
+    {
+      "id": "help",
+      "kind": "Text",
+      "phrases": [
+        "help",
+        "hello",
+        "hi",
+        "hey",
+        "app",
+        "report",
+        "reports",
+        "profile",
+        "settings",
+        "record",
+        "log activity"
+      ],
+      "reply": "Use Feed for shared activities and conversations, Reports for weekly or monthly impact and the leaderboard, Map for demo friends, and Profile to sign out. Activity recording and profile editing are not available yet. Ask 'My impact this week' or 'My impact this month' for stored personal totals. I use predefined local answers; general advice works offline, while personal totals need available report data."
+    }
+  ]
+}

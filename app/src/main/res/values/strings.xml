@@ -1,5 +1,22 @@
 <resources>
     <string name="app_name">Live Sustainably</string>
+    <string name="chat_open">Ask the sustainability assistant</string>
+    <string name="chat_title">Sustainability chat</string>
+    <string name="chat_assistant">Local assistant</string>
+    <string name="chat_clear">Clear chat</string>
+    <string name="chat_explanation">Basic assistant with predefined answers. General advice works offline; personal totals use available report data. The last 20 messages are kept while this chat is open. Clear chat to start again.</string>
+    <string name="chat_welcome">What would you like to explore?</string>
+    <string name="chat_prompt_transport">How can I improve my commute?</string>
+    <string name="chat_prompt_food">Suggest a food choice</string>
+    <string name="chat_prompt_week">My impact this week</string>
+    <string name="chat_prompt_month">My impact this month</string>
+    <string name="chat_replying">Preparing a reply…</string>
+    <string name="chat_interrupted">The previous reply was interrupted. Try it again or clear the chat.</string>
+    <string name="chat_retry">Retry reply</string>
+    <string name="chat_message">Your question</string>
+    <string name="chat_validation">Write a question of 1–500 characters.</string>
+    <string name="chat_counter">%1$d/500</string>
+    <string name="chat_send">Send question</string>
     <string name="data_error_signed_out">Sign in again to continue.</string>
     <string name="data_error_permission">You no longer have access to this content.</string>
     <string name="data_error_network">Check your connection and try again.</string>
