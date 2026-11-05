@@ -1,5 +1,5 @@
 {
-  "fallback": "I have predefined answers about transport, food, shopping, waste, CO₂e estimates, and using this app. Try a suggested question or ask about one of those topics.",
+  "fallback": "I can help with greener travel, food, shopping and everyday habits. Try a suggested question, or ask about your impact this week.",
   "intents": [
     {
       "id": "personal_month",
@@ -52,7 +52,7 @@
         "footprint",
         "points"
       ],
-      "reply": "Reports add the estimated kg CO₂e and points stored with each activity. These are illustrative savings, not a measurement of your full carbon footprint. Points are a separate score with no fixed conversion to kilograms. Open Reports to choose a week, month, or category; demo history is labelled."
+      "reply": "Reports bring together the CO₂e savings and points from your activities. Points are a separate score, with no fixed conversion to kilograms. Choose a week, month or category to explore your progress."
     },
     {
       "id": "transport",
@@ -128,7 +128,7 @@
         "nearby",
         "tracking"
       ],
-      "reply": "The Map tab shows fictional demo friend positions and sample statuses around a configured sample center. These are not live locations. The app does not collect your device location. Map tiles and new friend data need a connection."
+      "reply": "Open Map to explore your friends and their locations. Your phone’s location is not collected. Connect to the internet to load the map and refresh your circle."
     },
     {
       "id": "community",
@@ -144,7 +144,7 @@
         "likes",
         "comments"
       ],
-      "reply": "The Feed shows activities shared by you and your authorized friends, with likes and comments. Demo activities are labelled. Open Reports, then View period leaderboard, to compare all-category period points. Demo friend scores are illustrative snapshots. New accounts start without personal activity history."
+      "reply": "Your Feed brings together activities from you and your friends. Leave a like or a kind comment! Open Reports and the leaderboard to see how your points add up over the same period."
     },
     {
       "id": "help",
@@ -162,7 +162,7 @@
         "record",
         "log activity"
       ],
-      "reply": "Use Feed for shared activities and conversations, Reports for weekly or monthly impact and the leaderboard, Map for demo friends, and Profile to sign out. Activity recording and profile editing are not available yet. Ask 'My impact this week' or 'My impact this month' for stored personal totals. I use predefined local answers; general advice works offline, while personal totals need available report data."
+      "reply": "Use Feed to catch up with your circle, Reports to explore your impact and leaderboard, Map to find friends, and Profile to change your name, avatar and sharing preference. Ask “My impact this week” or “My impact this month” for your totals. General advice works offline."
     }
   ]
 }

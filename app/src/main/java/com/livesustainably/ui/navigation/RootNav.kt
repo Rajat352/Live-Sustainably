@@ -5,20 +5,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreOwner
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -35,6 +30,8 @@ import com.livesustainably.ui.SessionUiState
 import com.livesustainably.ui.screens.profile.ProfileViewModel
 import com.livesustainably.ui.screens.auth.AuthScreen
 import com.livesustainably.ui.components.LoadingContent
+import com.livesustainably.ui.components.AppToolbar
+import com.livesustainably.ui.components.AppTabBar
 import com.livesustainably.ui.screens.chat.ChatScreen
 import com.livesustainably.ui.screens.chat.ChatViewModel
 import com.livesustainably.ui.screens.profile.ProfileScreen
@@ -57,7 +54,7 @@ fun RootNav(
     state: SessionUiState,
     modifier: Modifier = Modifier
 ) {
-    Surface(modifier.fillMaxSize()) {
+    Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         when (state.session) {
             UserSession.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 LoadingContent("Restoring your session…")
@@ -169,22 +166,20 @@ private fun AppNavDisplay() {
     }
     Scaffold(
         topBar = {
-            if (navigation.canGoBack) {
-                TextButton(onClick = navigation::goBack) { Text("Back") }
-            }
+            AppToolbar(
+                canGoBack = navigation.canGoBack,
+                title = when (currentKey) {
+                    is AppRoute.Comments -> "A little encouragement"
+                    is AppRoute.Chat -> "Your green companion"
+                    is AppRoute.Leaderboard -> "Growing together"
+                    else -> "Live Sustainably"
+                },
+                onBack = navigation::goBack,
+            )
         },
         bottomBar = {
             if (currentKey is AppRoute.TopLevel) {
-                NavigationBar {
-                    TopLevelDestinations.entries.forEach { tab ->
-                        NavigationBarItem(
-                            selected = currentKey == tab.route,
-                            onClick = { navigation.selectTab(tab) },
-                            icon = { Icon(painterResource(tab.icon), contentDescription = null) },
-                            label = { Text(tab.label) },
-                        )
-                    }
-                }
+                AppTabBar(navigation.selectedTab, navigation::selectTab)
             }
         },
     ) { padding ->

@@ -11,8 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import com.livesustainably.ui.components.AppTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -23,6 +23,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.livesustainably.ui.components.AppButton
 import com.livesustainably.ui.components.AppCard
+import com.livesustainably.ui.components.ScreenHeading
+import com.livesustainably.ui.components.AvatarBadge
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.BorderStroke
 import com.livesustainably.ui.components.EmptyContent
 import com.livesustainably.ui.components.ErrorContent
 import com.livesustainably.ui.components.LoadingContent
@@ -42,8 +49,15 @@ fun CommentsScreen(
     LaunchedEffect(latestCommentId) {
         if (latestCommentId != null) listState.animateScrollToItem(state.comments.lastIndex)
     }
-    Column(Modifier.fillMaxSize().imePadding()) {
-        Text(stringResource(R.string.comments_title), style = MaterialTheme.typography.headlineLarge, modifier = Modifier.padding(horizontal = 24.dp))
+
+    Column(
+        Modifier.fillMaxSize().imePadding()
+    ) {
+
+        Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
+            ScreenHeading(stringResource(R.string.comments_title), "A few kind words can make someone’s day.")
+        }
+
         LazyColumn(
             state = listState,
             modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -56,7 +70,10 @@ fun CommentsScreen(
                 state.comments.isEmpty() -> item { EmptyContent(stringResource(R.string.comments_empty_title), stringResource(R.string.comments_empty_message)) }
                 else -> items(state.comments, key = { it.id }) { comment ->
                     AppCard {
-                        Text(stringResource(if (comment.authorId == state.userId) R.string.comment_you else R.string.community_member), style = MaterialTheme.typography.titleMedium)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            AvatarBadge(if (comment.authorId == state.userId) "sun" else "leaf", size = 36.dp)
+                            Text(stringResource(if (comment.authorId == state.userId) R.string.comment_you else R.string.community_member), style = MaterialTheme.typography.titleMedium)
+                        }
                         Text(comment.text)
                         Text(
                             if (comment.id == state.unconfirmedId) stringResource(R.string.comment_awaiting_confirmation) else formatPostDate(comment.createdAtMillis),
@@ -67,30 +84,44 @@ fun CommentsScreen(
                 }
             }
         }
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            state.sendError?.let {
-                Text(stringResource(R.string.comment_not_confirmed, dataErrorMessage(it)), color = MaterialTheme.colorScheme.error, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
+        ) {
+
+            Column(
+                Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                state.sendError?.let {
+                    Text(stringResource(R.string.comment_not_confirmed, dataErrorMessage(it)), color = MaterialTheme.colorScheme.error, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+                }
+
+                AppTextField(
+                    value = state.draft,
+                    onValueChange = onDraftChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.comment_label)) },
+                    enabled = !state.isSending && state.userId != null,
+                    isError = state.draftError || state.draft.trim().length > 500,
+                    supportingText = { Text(if (state.draftError) stringResource(R.string.comment_validation) else stringResource(R.string.comment_counter, state.draft.trim().length)) },
+                    minLines = 1,
+                    maxLines = 3,
+                )
+
+                AppButton(
+                    text = when {
+                        state.isSending -> stringResource(R.string.comment_sending)
+                        state.sendError != null -> stringResource(R.string.comment_retry)
+                        else -> stringResource(R.string.comment_send)
+                    },
+                    onClick = onSend,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !state.isSending && !state.isLoading && state.loadError == null && state.userId != null,
+                )
             }
-            OutlinedTextField(
-                value = state.draft,
-                onValueChange = onDraftChange,
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.comment_label)) },
-                enabled = !state.isSending && state.userId != null,
-                isError = state.draftError || state.draft.trim().length > 500,
-                supportingText = { Text(if (state.draftError) stringResource(R.string.comment_validation) else stringResource(R.string.comment_counter, state.draft.trim().length)) },
-                minLines = 1,
-                maxLines = 3,
-            )
-            AppButton(
-                text = when {
-                    state.isSending -> stringResource(R.string.comment_sending)
-                    state.sendError != null -> stringResource(R.string.comment_retry)
-                    else -> stringResource(R.string.comment_send)
-                },
-                onClick = onSend,
-                enabled = !state.isSending && !state.isLoading && state.loadError == null && state.userId != null,
-            )
         }
     }
 }

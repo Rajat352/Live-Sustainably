@@ -33,3 +33,13 @@ internal fun formatPostDate(millis: Long): String = DateTimeFormatter.ofLocalize
 internal fun formatSaving(value: Double): String = NumberFormat.getNumberInstance().apply {
     maximumFractionDigits = 2
 }.format(value)
+
+internal fun displayCommunityName(value: String): String = value.removeSuffix(" · Demo").trim()
+
+internal fun displayFriendStatus(value: String): String = value.removePrefix("Sample: ")
+    .replaceFirstChar { it.uppercase() }
+
+internal fun displayActivityDescription(value: String, isDemo: Boolean): String = if (isDemo) {
+    value.replace(Regex("(?i)\\b(?:demo|sample|illustrative)\\b\\s*[:·–-]?\\s*"), "")
+        .trim().replaceFirstChar { it.uppercase() }
+} else value

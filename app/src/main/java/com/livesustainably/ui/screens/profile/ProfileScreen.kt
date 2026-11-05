@@ -9,12 +9,12 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.livesustainably.ui.components.AppTextField
+import com.livesustainably.ui.components.ChoicePill
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -30,6 +30,9 @@ import com.livesustainably.domain.model.PRESET_AVATARS
 import com.livesustainably.ui.common.dataErrorMessage
 import com.livesustainably.ui.components.AppButton
 import com.livesustainably.ui.components.AppCard
+import com.livesustainably.ui.components.ScreenHeading
+import com.livesustainably.ui.components.AvatarBadge
+import com.livesustainably.ui.components.HeroCard
 import com.livesustainably.ui.components.ErrorContent
 import com.livesustainably.ui.components.LoadingContent
 
@@ -43,10 +46,7 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
 
-        Text(stringResource(R.string.profile_title), style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.semantics { heading() })
-
-        Text(stringResource(R.string.profile_subtitle), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        ScreenHeading(stringResource(R.string.profile_title), stringResource(R.string.profile_subtitle), "YOUR LITTLE CORNER")
 
         when {
             state.isInitializing -> LoadingContent(stringResource(R.string.profile_initializing))
@@ -54,6 +54,7 @@ fun ProfileScreen(
             state.isLoading -> LoadingContent(stringResource(R.string.profile_loading))
             state.loadError != null -> ErrorContent(dataErrorMessage(state.loadError), { onAction(ProfileAction.Retry) })
             state.profile != null && state.preferences != null -> {
+                HeroCard("Hey, ${state.profile.displayName}!", "A greener you. A happier planet.")
                 ProfileEditor(state, onAction)
                 PreferencesEditor(state, onAction)
             }
@@ -78,8 +79,15 @@ private fun ProfileEditor(
     val enabled = state.canEdit && !state.isSavingProfile
 
     AppCard {
-        Text(stringResource(R.string.profile_identity), style = MaterialTheme.typography.titleLarge)
-        OutlinedTextField(
+        androidx.compose.foundation.layout.Row(
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            AvatarBadge(state.avatarId)
+            Text(stringResource(R.string.profile_identity), style = MaterialTheme.typography.titleLarge)
+        }
+
+        AppTextField(
             value = state.displayName,
             onValueChange = { onAction(ProfileAction.UpdateName(it)) },
             modifier = Modifier.fillMaxWidth(),
@@ -96,15 +104,17 @@ private fun ProfileEditor(
                     "earth" -> "🌍" to R.string.avatar_earth
                     else -> "🌿" to R.string.avatar_leaf
                 }
-                FilterChip(
+                ChoicePill(
                     selected = state.avatarId == id,
                     onClick = { onAction(ProfileAction.SelectAvatar(id)) },
                     label = { Text("$symbol ${stringResource(label)}") }, enabled = enabled,
                 )
             }
         }
+
         state.profileSaveError?.let { SaveError(it) }
         if (state.profileSaved) StatusText(stringResource(R.string.profile_saved))
+
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             AppButton(
                 stringResource(when {

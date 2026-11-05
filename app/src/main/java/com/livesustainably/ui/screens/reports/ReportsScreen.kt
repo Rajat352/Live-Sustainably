@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
@@ -37,61 +38,62 @@ fun ReportsScreen(
     onAction: (ReportsAction) -> Unit,
     onLeaderboard: (ReportSelection) -> Unit
 ) {
+    var showHowItWorks by rememberSaveable { mutableStateOf(false) }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
-        item {
-            Text(stringResource(R.string.reports_title), style = MaterialTheme.typography.headlineLarge)
-            Text(stringResource(R.string.reports_subtitle), color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        item {
-            AppCard {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ReportPeriod.entries.forEach { period ->
-                        FilterChip(
-                            selected = state.selection.period == period,
-                            onClick = { onAction(ReportsAction.SelectPeriod(period)) },
-                            label = { Text(stringResource(if (period == ReportPeriod.Week) R.string.reports_weekly else R.string.reports_monthly)) },
-                        )
-                    }
-                }
-                Text(formatReportWindow(state.window), style = MaterialTheme.typography.titleMedium)
-                Text(stringResource(R.string.reports_timezone, state.window.zone.id), style = MaterialTheme.typography.bodySmall)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { onAction(ReportsAction.ShiftPeriod(-1)) }) { Text(stringResource(R.string.reports_previous)) }
-                    TextButton(onClick = { onAction(ReportsAction.Today) }) { Text(stringResource(R.string.reports_current)) }
-                    TextButton(onClick = { onAction(ReportsAction.ShiftPeriod(1)) }) { Text(stringResource(R.string.reports_next)) }
-                }
-                Text(stringResource(R.string.reports_category), style = MaterialTheme.typography.labelLarge)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(state.category == null, { onAction(ReportsAction.SelectCategory(null)) }, label = { Text(stringResource(R.string.reports_all)) })
-                    ActivityCategory.entries.forEach { category ->
-                        FilterChip(state.category == category, { onAction(ReportsAction.SelectCategory(category)) }, label = { Text(categoryLabel(category)) })
+
+        item { ScreenHeading(stringResource(R.string.reports_title), stringResource(R.string.reports_subtitle), "LOOK AT YOU GROW") }
+
+        state.report?.let { report ->
+            item {
+                HeroCard(formatSaving(report.total.savedKgCo2e) + " kg\nCO₂e saved", "Little choices. Growing impact.") {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        MetricTile("⭐", report.total.points.toString(), "Points", Modifier.weight(1f), onHero = true)
+                        MetricTile("🌱", report.total.activityCount.toString(), "Activities", Modifier.weight(1f), onHero = true)
                     }
                 }
             }
         }
 
         item {
-            AppButton(stringResource(R.string.reports_leaderboard), { onLeaderboard(state.selection) }, Modifier.fillMaxWidth())
+            AppCard {
+                Text("Find your rhythm", style = MaterialTheme.typography.titleLarge)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ReportPeriod.entries.forEach { period ->
+                        ChoicePill(
+                            selected = state.selection.period == period,
+                            onClick = { onAction(ReportsAction.SelectPeriod(period)) },
+                            label = { Text(stringResource(if (period == ReportPeriod.Week) R.string.reports_weekly else R.string.reports_monthly)) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
+                Text(formatReportWindow(state.window), style = MaterialTheme.typography.titleMedium)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(onClick = { onAction(ReportsAction.ShiftPeriod(-1)) }) { Text("‹ " + stringResource(R.string.reports_previous)) }
+                    TextButton(onClick = { onAction(ReportsAction.Today) }) { Text(stringResource(R.string.reports_current)) }
+                    TextButton(onClick = { onAction(ReportsAction.ShiftPeriod(1)) }) { Text(stringResource(R.string.reports_next) + " ›") }
+                }
+                Text(stringResource(R.string.reports_category), style = MaterialTheme.typography.labelLarge)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ChoicePill(state.category == null, { onAction(ReportsAction.SelectCategory(null)) }, label = { Text(stringResource(R.string.reports_all)) })
+                    ActivityCategory.entries.forEach { category ->
+                        ChoicePill(state.category == category, { onAction(ReportsAction.SelectCategory(category)) },
+                            label = { Text(categorySymbol(category) + " " + categoryLabel(category)) })
+                    }
+                }
+            }
         }
+
+        item { AppButton(stringResource(R.string.reports_leaderboard), { onLeaderboard(state.selection) }, Modifier.fillMaxWidth()) }
 
         when {
             state.isLoading -> item { LoadingContent(stringResource(R.string.reports_loading)) }
             state.error != null -> item { ErrorContent(dataErrorMessage(state.error), { onAction(ReportsAction.Retry) }) }
             else -> state.report?.let { report ->
-                item {
-                    AppCard {
-                        Text(stringResource(R.string.reports_total), style = MaterialTheme.typography.titleLarge)
-                        Text(stringResource(R.string.feed_saving, formatSaving(report.total.savedKgCo2e)), style = MaterialTheme.typography.headlineMedium)
-                        Text(stringResource(R.string.reports_points, report.total.points))
-                        Text(stringResource(R.string.reports_actions, report.total.activityCount))
-                        if (report.containsDemo) Text(stringResource(R.string.reports_demo_history), color = MaterialTheme.colorScheme.primary)
-                    }
-                }
                 if (report.total.activityCount == 0) item {
                     EmptyContent(stringResource(R.string.reports_empty_title), stringResource(R.string.reports_empty_message))
                 }
@@ -100,23 +102,48 @@ fun ReportsScreen(
                     AppCard {
                         Text(stringResource(R.string.reports_breakdown), style = MaterialTheme.typography.titleLarge)
                         report.categories.forEach { (category, total) ->
-                            Text(stringResource(R.string.reports_category_total, categoryLabel(category), formatSaving(total.savedKgCo2e), total.points))
+                            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Text(categorySymbol(category), style = MaterialTheme.typography.headlineMedium,
+                                    modifier = Modifier.clearAndSetSemantics {})
+                                Column(Modifier.weight(1f)) {
+                                    Text(categoryLabel(category), style = MaterialTheme.typography.titleMedium)
+                                    Text(formatSaving(total.savedKgCo2e) + " kg CO₂e · " + total.points + " points",
+                                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
                             LinearProgressIndicator(
                                 progress = { if (report.total.savedKgCo2e == 0.0) 0f else (total.savedKgCo2e / report.total.savedKgCo2e).toFloat() },
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().height(9.dp),
+                                color = when (category) {
+                                    ActivityCategory.Transport -> com.livesustainably.ui.theme.HeroCyan
+                                    ActivityCategory.Food -> com.livesustainably.ui.theme.LeafGreen
+                                    ActivityCategory.Shopping -> com.livesustainably.ui.theme.Coral
+                                }, trackColor = MaterialTheme.colorScheme.surfaceContainerLow,
                             )
                         }
                     }
                 }
                 item {
-                    AppCard {
-                        Text(stringResource(R.string.reports_assumptions_title), style = MaterialTheme.typography.titleMedium)
-                        Text(stringResource(R.string.reports_assumptions))
+                    TextButton(onClick = { showHowItWorks = !showHowItWorks }) {
+                        Text(stringResource(R.string.reports_assumptions_title) + if (showHowItWorks) "  −" else "  +")
+                    }
+                    if (showHowItWorks) {
+                        Text(stringResource(R.string.reports_assumptions), style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.reports_timezone, state.window.zone.id), style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
         }
     }
+}
+
+internal fun categorySymbol(category: ActivityCategory): String = when (category) {
+    ActivityCategory.Transport -> "🚲"
+    ActivityCategory.Food -> "🥑"
+    ActivityCategory.Shopping -> "🛍️"
 }
 
 @Composable
@@ -131,7 +158,7 @@ private fun DailyChart(
     val xFormatter = remember(report.window) {
         CartesianValueFormatter { _, value, _ -> report.days.getOrNull(value.toInt())?.date?.format(dateFormat).orEmpty() }
     }
-    val summary = stringResource(R.string.reports_chart_summary, report.days.size, formatSaving(report.total.savedKgCo2e))
+    val summary = pluralStringResource(R.plurals.reports_chart_summary, report.days.size, report.days.size, formatSaving(report.total.savedKgCo2e))
     AppCard {
         Text(stringResource(R.string.reports_daily_chart), style = MaterialTheme.typography.titleLarge)
         Text(stringResource(R.string.reports_chart_units), style = MaterialTheme.typography.bodySmall)
@@ -147,7 +174,6 @@ private fun DailyChart(
                 modifier = Modifier.fillMaxWidth().height(240.dp).clearAndSetSemantics { contentDescription = summary },
             )
         }
-        Text(summary)
         TextButton(onClick = { showValues = !showValues }) {
             Text(stringResource(if (showValues) R.string.reports_hide_values else R.string.reports_show_values))
         }

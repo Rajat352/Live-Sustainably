@@ -76,7 +76,6 @@ internal fun formatChatReport(report: SustainabilityReport): String {
     val dates = "${report.window.startDate} to ${report.window.endDateExclusive.minusDays(1)} (${report.window.zone.id})"
     val count = if (total.activityCount == 1) "1 activity" else "${total.activityCount} activities"
     val summary = if (total.activityCount == 0) "No activities are stored for $dates."
-        else "For $dates, your stored activities total $saving kg CO₂e estimated savings, ${total.points} points, and $count across all categories."
-    return summary + (if (report.containsDemo) " Includes labelled demo history." else "") +
-        " These are available stored estimates, not verified emissions measurements. Open Reports for the breakdown and to check for updates."
+        else "For $dates, your activities total $saving kg CO₂e saved, ${total.points} points, and $count across all categories."
+    return summary + " Open Reports to explore the breakdown."
 }

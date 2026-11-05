@@ -23,13 +23,18 @@ private val LightColors = lightColorScheme(
     onBackground = Ink,
     surface = Color.White,
     onSurface = Ink,
-    surfaceVariant = Color(0xFFE7EBF6),
-    onSurfaceVariant = Color(0xFF4B566B),
-    outline = Color(0xFF707B90),
+    surfaceVariant = Color(0xFFE8ECF8),
+    onSurfaceVariant = Color(0xFF6B6884),
+    outline = Color(0xFF8784A2),
+    outlineVariant = PaleBlue,
+    surfaceContainer = Color(0xFFF9FBFF),
+    surfaceContainerLow = Color(0xFFEBF2FF),
+    surfaceContainerHigh = Color(0xFFE4EBFA),
 )
 
 private val DarkColors = darkColorScheme(
     primary = Color(0xFFA7CCFF),
+    onPrimary = Color(0xFF13356C),
     primaryContainer = Color(0xFF194475),
     onPrimaryContainer = PaleBlue,
     secondary = Color(0xFF7BD5E8),
@@ -38,6 +43,10 @@ private val DarkColors = darkColorScheme(
     onBackground = Color(0xFFE1E7F5),
     surface = Color(0xFF1C2639),
     onSurface = Color(0xFFE1E7F5),
+    outlineVariant = Color(0xFF334565),
+    surfaceContainer = Color(0xFF253149),
+    surfaceContainerLow = Color(0xFF202A42),
+    surfaceContainerHigh = Color(0xFF303D59),
     surfaceVariant = Color(0xFF303C52),
     onSurfaceVariant = Color(0xFFC0C9DA),
 )
@@ -51,9 +60,9 @@ fun LiveSustainablyTheme(
         colorScheme = if (darkTheme) DarkColors else LightColors,
         typography = Typography,
         shapes = Shapes(
-            small = RoundedCornerShape(12.dp),
-            medium = RoundedCornerShape(20.dp),
-            large = RoundedCornerShape(28.dp),
+            small = RoundedCornerShape(18.dp),
+            medium = RoundedCornerShape(24.dp),
+            large = RoundedCornerShape(32.dp),
         ),
         content = content,
     )

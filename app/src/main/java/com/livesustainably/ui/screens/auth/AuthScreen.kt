@@ -14,9 +14,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.livesustainably.ui.components.AppTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +41,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.livesustainably.ui.components.AppButton
 import com.livesustainably.ui.components.AppCard
+import com.livesustainably.ui.components.HeroCard
+import com.livesustainably.ui.components.ScreenHeading
 
 @Composable
 fun AuthScreen(
@@ -49,13 +51,31 @@ fun AuthScreen(
 ) {
     val viewModel: AuthViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    AuthForm(
+        isSignup, onSwitchForm, state,
+        viewModel::updateDisplayName, viewModel::updateEmail, viewModel::updatePassword,
+        viewModel::updateConfirmPassword, onSubmit = { viewModel.submit(isSignup) },
+    )
+}
+
+@Composable
+internal fun AuthForm(
+    isSignup: Boolean,
+    onSwitchForm: () -> Unit,
+    state: AuthFormState,
+    onNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onConfirmChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+) {
     val focus = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     var passwordVisible by remember { mutableStateOf(false) }
     val submit = {
         keyboard?.hide()
         focus.clearFocus()
-        viewModel.submit(isSignup)
+        onSubmit()
     }
 
     BackHandler(enabled = state.isSubmitting) {}
@@ -68,21 +88,17 @@ fun AuthScreen(
             Modifier.widthIn(max = 560.dp).fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            Text("Live Sustainably", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(if (isSignup) "Small steps. Lasting change." else "Welcome back", style = MaterialTheme.typography.headlineLarge)
-                Text(
-                    if (isSignup) "Create an account to start your sustainability journey." else "Sign in to continue your sustainability journey.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            ScreenHeading("Live Sustainably", eyebrow = "SMALL STEPS. BIG DIFFERENCE.")
+            HeroCard(
+                title = if (isSignup) "Hello,\nnew friend!" else "Hey,\nplanet pal!",
+                subtitle = if (isSignup) "Your greener everyday starts here." else "Welcome back! Let’s grow some good.",
+            )
             AppCard {
-                Text(if (isSignup) "Create your account" else "Sign in with email", style = MaterialTheme.typography.titleLarge)
+                Text(if (isSignup) "Join the good side" else "Make yourself at home", style = MaterialTheme.typography.titleLarge)
                 if (isSignup) {
-                    OutlinedTextField(
+                    AppTextField(
                         value = state.displayName,
-                        onValueChange = viewModel::updateDisplayName,
+                        onValueChange = onNameChange,
                         modifier = Modifier.fillMaxWidth().semantics { contentType = ContentType.PersonFullName },
                         label = { Text("Display name") },
                         singleLine = true,
@@ -93,9 +109,9 @@ fun AuthScreen(
                         keyboardActions = KeyboardActions(onNext = { focus.moveFocus(FocusDirection.Down) }),
                     )
                 }
-                OutlinedTextField(
+                AppTextField(
                     value = state.email,
-                    onValueChange = viewModel::updateEmail,
+                    onValueChange = onEmailChange,
                     modifier = Modifier.fillMaxWidth().semantics { contentType = ContentType.EmailAddress },
                     label = { Text("Email address") },
                     singleLine = true,
@@ -105,15 +121,15 @@ fun AuthScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(onNext = { focus.moveFocus(FocusDirection.Down) }),
                 )
-                OutlinedTextField(
+                AppTextField(
                     value = state.password,
-                    onValueChange = viewModel::updatePassword,
+                    onValueChange = onPasswordChange,
                     modifier = Modifier.fillMaxWidth().semantics { contentType = if (isSignup) ContentType.NewPassword else ContentType.Password },
                     label = { Text("Password") },
                     singleLine = true,
                     enabled = !state.isSubmitting,
                     isError = state.passwordError != null,
-                    supportingText = { Text(state.passwordError ?: if (isSignup) "Use at least 6 characters." else "Your password is case sensitive.") },
+                    supportingText = { Text(state.passwordError ?: if (isSignup) "Use at least 6 characters." else "") },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         TextButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -127,9 +143,9 @@ fun AuthScreen(
                     ),
                 )
                 if (isSignup) {
-                    OutlinedTextField(
+                    AppTextField(
                         value = state.confirmPassword,
-                        onValueChange = viewModel::updateConfirmPassword,
+                        onValueChange = onConfirmChange,
                         modifier = Modifier.fillMaxWidth().semantics { contentType = ContentType.NewPassword },
                         label = { Text("Confirm password") },
                         singleLine = true,
@@ -146,7 +162,7 @@ fun AuthScreen(
                     Text(if (isSignup) "Creating your account…" else "Signing in…", Modifier.semantics { liveRegion = LiveRegionMode.Polite })
                 }
                 AppButton(
-                    text = if (isSignup) "Create account" else "Sign in",
+                    text = if (isSignup) "Let’s get growing" else "Let’s go",
                     onClick = submit,
                     enabled = !state.isSubmitting,
                     modifier = Modifier.fillMaxWidth(),

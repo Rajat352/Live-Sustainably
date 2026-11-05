@@ -24,9 +24,19 @@ import androidx.compose.ui.unit.dp
 import com.livesustainably.domain.model.UserProfile
 import com.livesustainably.R
 import com.livesustainably.ui.common.dataErrorMessage
+import com.livesustainably.ui.common.displayCommunityName
+import com.livesustainably.ui.common.displayActivityDescription
 import com.livesustainably.ui.common.formatPostDate
 import com.livesustainably.ui.common.formatSaving
 import com.livesustainably.ui.components.AppCard
+import com.livesustainably.ui.components.HeroCard
+import com.livesustainably.ui.components.ScreenHeading
+import com.livesustainably.ui.components.AvatarBadge
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.graphics.Color
 import com.livesustainably.ui.components.EmptyContent
 import com.livesustainably.ui.components.ErrorContent
 import com.livesustainably.ui.components.LoadingContent
@@ -41,17 +51,25 @@ fun FeedScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(24.dp),
+        contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.feed_title), style = MaterialTheme.typography.headlineLarge)
-                Text(stringResource(R.string.feed_subtitle), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(stringResource(R.string.feed_description), style = MaterialTheme.typography.bodyMedium)
-                TextButton(onClick = onChat) { Text(stringResource(R.string.chat_open)) }
+            ScreenHeading(stringResource(R.string.feed_title), stringResource(R.string.feed_subtitle), "GOOD THINGS GROW TOGETHER")
+        }
+
+        item {
+            HeroCard("Small steps.\nHappy planet.", "A greener commute, a thoughtful meal. Every little choice counts.") {
+                TextButton(
+                    onClick = onChat,
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                    modifier = Modifier.background(Color.White.copy(alpha = 0.18f), CircleShape),
+                ) { Text("Meet Sprout, your green guide  →") }
             }
         }
+
+        item { Text("Fresh from your circle", style = MaterialTheme.typography.titleLarge) }
+
         when {
             state.isLoading -> item { LoadingContent(stringResource(R.string.feed_loading)) }
             state.error != null -> item { ErrorContent(dataErrorMessage(state.error), { onAction(FeedAction.Retry) }) }
@@ -94,11 +112,10 @@ private fun FeedPostCard(
             TextButton(onClick = { onAction(FeedAction.RetryAuthor(item.post.authorId)) }) { Text(stringResource(R.string.feed_retry_profile)) }
         }
         Text(formatPostDate(item.post.createdAtMillis), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        if (item.post.isDemo) {
-            Text(stringResource(R.string.feed_demo_estimate), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
-        }
-        Text(item.post.description, style = MaterialTheme.typography.bodyLarge)
-        Text(stringResource(R.string.feed_saving, formatSaving(item.post.savedKgCo2e)), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+        Text(displayActivityDescription(item.post.description, item.post.isDemo), style = MaterialTheme.typography.bodyLarge)
+        Text("🌱  " + stringResource(R.string.feed_saving, formatSaving(item.post.savedKgCo2e)),
+            style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer, CircleShape).padding(horizontal = 14.dp, vertical = 9.dp))
         val likedDescription = stringResource(if (liked) R.string.feed_liked else R.string.feed_not_liked)
         FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             TextButton(
@@ -130,17 +147,11 @@ private fun FeedPostCard(
 
 @Composable
 private fun AuthorIdentity(profile: UserProfile?, isYou: Boolean) {
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        val avatar = when (profile?.avatarId) {
-            "tree" -> "🌳"
-            "sun" -> "☀"
-            "earth" -> "🌍"
-            else -> "🌿"
-        }
-        Text(avatar, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(top = 2.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        AvatarBadge(profile?.avatarId)
         Text(
-            if (isYou) stringResource(R.string.author_you, profile?.displayName ?: stringResource(R.string.your_account))
-            else profile?.displayName ?: stringResource(R.string.community_member),
+            if (isYou) stringResource(R.string.author_you, profile?.displayName?.let(::displayCommunityName) ?: stringResource(R.string.your_account))
+            else profile?.displayName?.let(::displayCommunityName) ?: stringResource(R.string.community_member),
             style = MaterialTheme.typography.titleMedium,
         )
     }
