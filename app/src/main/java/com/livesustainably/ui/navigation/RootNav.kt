@@ -102,7 +102,6 @@ private fun AuthNavDisplay() {
 private fun AppNavDisplay() {
 
     val viewModel: ProfileViewModel = hiltViewModel()
-    val accountState by viewModel.state.collectAsStateWithLifecycle()
 
     val navigation = rememberAppNavigationState()
     val currentKey = navigation.currentStack.lastOrNull()
@@ -139,7 +138,10 @@ private fun AppNavDisplay() {
             val leaderboardState by leaderboardViewModel.state.collectAsStateWithLifecycle()
             LeaderboardScreen(leaderboardState, leaderboardViewModel::retry)
         }
-        entry<AppRoute.TopLevel.Profile> { ProfileScreen(accountState, viewModel::signOut, viewModel::retryProfile) }
+        entry<AppRoute.TopLevel.Profile> {
+            val profileState by viewModel.state.collectAsStateWithLifecycle()
+            ProfileScreen(profileState, viewModel::onAction)
+        }
         entry<AppRoute.Comments> { route ->
             val commentsViewModel = hiltViewModel<CommentsViewModel, CommentsViewModel.Factory>(
                 creationCallback = { it.create(CommentThread(route.authorId, route.postId)) },
